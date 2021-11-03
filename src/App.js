@@ -5,7 +5,6 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
 import { DrawerStyled } from './sidebar/style'
-import WhatsApp from '@material-ui/icons/WhatsApp';
 import 'semantic-ui-css/semantic.min.css'
 import { iniciarConexaoWhatsapp } from './services/auth'
 import AppBar from '@material-ui/core/AppBar';
@@ -14,6 +13,12 @@ import Typography from '@material-ui/core/Typography';
 import { listStatusMessageData } from './messageData'
 import MobileOffIcon from '@material-ui/icons/MobileOff';
 import MobileFriendlyIcon from '@material-ui/icons/MobileFriendly';
+import SpellcheckIcon from '@material-ui/icons/Spellcheck';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import DialogKeyWords from './dialogKeyWords'
+import Tootip from '@material-ui/core/Tooltip'
 
 /** Socket */
 import socketIO from 'socket.io-client'
@@ -66,6 +71,7 @@ function App() {
   const [socketQrCode, setSocketQrCode] = React.useState({ qr_code_base64: null })
   const [socketStatusSession, setSocketStatusSession] = React.useState({ statusSession: null })
   const [statusSessionMessageButtom, setStatusSessionMessageButtom] = React.useState(null)
+  const [isVisibleDialogKeyWords, setIsVisibleKeyWords] = React.useState(false)
   let listStatus = ['notLogged', 'browserClose', 'qrReadFail', 'autocloseCalled', 'desconnectedMobile', 'deleteToken', 'deviceNotConnected', 'serverWssNotConnected', 'noOpenBrowser']
 
   useEffect(() => {
@@ -119,15 +125,15 @@ function App() {
               }),
             }}
           >
-            {/* <List style={{ position: 'relative', left: '8px', display: 'flex', flexDirection: 'column' }}>
-              <ListItem button>
-                <ListItemIcon>
-                  <WhatsApp style={
-                    (listStatus.includes(socketStatusSession.statusSession) || !socketStatusSession.statusSession) ? { color: 'red', position: 'relative', right: '6px', fontSize: '48px' }
-                      : { color: 'green', position: 'relative', right: '6px', fontSize: '48px' }} />
-                </ListItemIcon>
+            <List style={{ position: 'relative', left: '8px', display: 'flex', flexDirection: 'column' }}>
+              <ListItem button onClick={() => setIsVisibleKeyWords(true)}>
+                <Tootip title='Clique aqui para gerenciar as palavras chaves!'>
+                  <ListItemIcon>
+                    <SpellcheckIcon style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'white' }}/>
+                  </ListItemIcon>
+                </Tootip>
               </ListItem>
-            </List> */}
+            </List>
           </DrawerStyled>
         </Grid>
         <Grid item xs={8}>
@@ -176,6 +182,10 @@ function App() {
           </Paper>
         </Grid>
       </Grid>
+
+       {console.log({isVisibleDialogKeyWords})}     
+      {isVisibleDialogKeyWords && <DialogKeyWords visible={isVisibleDialogKeyWords} setVisible={setIsVisibleKeyWords}/>}      
+
     </div>
   );
 }
