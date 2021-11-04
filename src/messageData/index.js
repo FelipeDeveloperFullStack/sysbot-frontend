@@ -8,7 +8,7 @@ export const listStatusMessageData = {
   'deviceNotConnected': 'Dispositivo não conectado!',
   'serverWssNotConnected': 'Falha de conexão com servidor WSS',
   'noOpenBrowser': '',
-  'isLogged': 'Logado!',
-  'chatsAvailable': 'Chat disponível',
-  'qrReadSuccess': 'Leitura do QR Code com sucesso!'
+  'isLogged': 'Online! Monitorando...',
+  'chatsAvailable': 'Online! Monitorando...',
+  'qrReadSuccess': 'Online! Monitorando...'
 }

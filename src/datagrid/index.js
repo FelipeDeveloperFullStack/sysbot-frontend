@@ -1,9 +1,14 @@
 import * as React from 'react';
-import { DataGrid } from '@material-ui/data-grid';
+import { useDispatch, useSelector } from 'react-redux'
+/** Semantic Ui */
 import { Message } from 'semantic-ui-react'
+/** Material Ui */
+import TextField from '@material-ui/core/TextField';
+import { DataGrid } from '@material-ui/data-grid';
 import Button from '@material-ui/core/Button';
 /** Icon */
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import AddIcon from '@material-ui/icons/Add';
 
 const columns = [
   { field: 'id', headerName: 'ID', width: 90 },
@@ -15,25 +20,47 @@ const columns = [
   }
 ]
 
-const rows = [
-  { id: 1, word: 'Snow' },
-  { id: 2, word: 'Lannister' },
-  { id: 3, word: 'Lannister' },
-  { id: 4, word: 'Stark' },
-  { id: 5, word: 'Targaryen' },
-  { id: 6, word: 'Melisandre' },
-  { id: 7, word: 'Clifford' },
-  { id: 8, word: 'Frances' },
-  { id: 9, word: 'Roxie' },
-]
-
-export default function DataTable() {
+export default function DataTable(props) {
   const [rowSelected, setRowSelected] = React.useState([])
+  const [validatorField, setValidatorField] = React.useState({ isValidate: false, message: '' })
+  const [word, setWord] = React.useState('')
+  const dispatch = useDispatch()
+  
   const selectionModel = (event) => {
     setRowSelected(event)
   }
+
+  const onSubmit = () => {
+    if(String(word).trim() === ''){
+      setValidatorField({ isValidate: true, message: 'Esse campo é obrigatório!'})
+    }else{
+      setValidatorField({ isValidate: false, message: ''})
+      dispatch({
+        type: 'ADD_KEY_WORD',
+        keywords: {
+          keyWord: ['po', 'uiui']
+        }
+      })
+    }
+  }
+
   return (
     <div style={{ height: 400, width: '100%' }}>
+        <div style={{display: 'flex', paddingBottom: '5px'}}>
+          <div>
+            <TextField size='small' 
+                       label="Palavra chave" 
+                       variant="outlined"
+                       value={word}
+                       error={validatorField.isValidate}
+                       helperText={validatorField.isValidate && validatorField.message}
+                       onChange={(event) => setWord(event.target.value)}/>
+          </div>
+          <div style={{position: 'relative', top: '2px', paddingLeft: '3px'}}>
+            <Button startIcon={<AddIcon/>} variant="contained" color="primary" type='submit' onClick={() => onSubmit()}>
+              Adicionar
+            </Button> </div>
+        </div>
       {rowSelected.length ?
         <Message>
           <Message.Header>{rowSelected.length > 1 ? 'Excluir linhas selecionadas?' : 'Excluir linha selecionada?'}</Message.Header>
@@ -42,9 +69,11 @@ export default function DataTable() {
           </Button>
         </Message> : <></>}
       <DataGrid
-        rows={rows}
+        rows={props.words}
         columns={columns}
-        pageSize={5}
+        pagination={false}
+        hideFooterPagination={true}
+        hideFooter={true}
         checkboxSelection
         onSelectionModelChange={selectionModel}
       />
