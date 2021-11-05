@@ -183,7 +183,6 @@ function App() {
         </Grid>
       </Grid>
 
-       {console.log({isVisibleDialogKeyWords})}     
       {isVisibleDialogKeyWords && <DialogKeyWords visible={isVisibleDialogKeyWords} setVisible={setIsVisibleKeyWords}/>}      
 
     </div>

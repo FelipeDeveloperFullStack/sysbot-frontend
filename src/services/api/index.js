@@ -6,3 +6,11 @@ export const getApi = async ({url}) => {
   let result = await axiosCreate.get(url)
   return result
 }
+
+export const postApi = async ({url, data}) => {
+  try {
+    await axiosCreate.post(url, data)
+  } catch (error) {
+    throw new Error(error)
+  }
+}
