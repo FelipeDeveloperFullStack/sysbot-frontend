@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { useDispatch } from 'react-redux'
 /** Semantic Ui */
 import { Message } from 'semantic-ui-react'
@@ -12,7 +12,9 @@ import AddIcon from '@material-ui/icons/Add';
 /** Util */
 import { getLocalStorage, setLocalStorage } from '../util/util'
 /** Services Api */
-import { postApi, getApi } from '../services/api'
+import { postApi, getApi, deleteApi } from '../services/api'
+/** Lodash */
+import _ from 'lodash'
 
 const columns = [
   { field: 'id', headerName: 'ID', width: 90 },
@@ -29,7 +31,6 @@ export default function DataTable(props) {
   const [words, setWords] = React.useState([])
   const [validatorField, setValidatorField] = React.useState({ isValidate: false, message: '' })
   const [word, setWord] = React.useState('')
-  const dispatch = useDispatch()
 
   const selectionModel = (event) => {
     setRowSelected(event)
@@ -41,47 +42,55 @@ export default function DataTable(props) {
 
   const getKeyWords = async () => {
     let result = await getApi({ url: 'key_words' })
-    result = tratarDados({ dados: result.data })
-    setLocalStorage({ key: 'key_words', value: result })
-    setWords(result)
+    let { words } = result.data
+    if(words){
+      result = tratarDados({ dados: result.data.words })
+      setLocalStorage({ key: 'key_words', value: result })
+      setWords(result)
+    }else {
+      setWords([])
+    }
   }
 
   const tratarDados = ({ dados }) => {
     let dadosTemp = []
     Array.from(dados).forEach((value, index) => {
-      dadosTemp.push({
-        id: index + 1,
-        word: value
-      })
+      if (value.word) {
+        dadosTemp.push({
+          id: index + 1,
+          _id: value.id,
+          word: value.word
+        })
+      }
     })
     return dadosTemp
   }
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (String(word).trim() === '') {
       setValidatorField({ isValidate: true, message: 'Esse campo é obrigatório!' })
     } else {
       setValidatorField({ isValidate: false, message: '' })
-      let words = getLocalStorage({ key: 'key_words' })
-      words.push({ id: words.length + 1, word: String(word) })
-      setLocalStorage({ key: 'key_words', value: words })
-      setWords(words)
+      setWord("")
 
-      insertAndUpdate()
+      await insertAndUpdate({ word })
     }
   }
 
-  const insertAndUpdate = () => {
+  const insertAndUpdate = async ({ word }) => {
     try {
-      let keyWords = getLocalStorage({ key: 'key_words' })
-      postApi({ url: '/key_words/update', data: [keyWords] })
-      console.log("Atualizado com sucesso!")
+      let result = await postApi({ url: '/key_words/update', data: { word } })
+      let { isUpdate } = result.data
+      if (isUpdate) {
+        props.setOpenShowMessage(true)
+        getKeyWords()
+      }
     } catch (error) {
       console.error(error)
     }
   }
 
-  const handleDeleteKeyWord = () => {
+  const handleDeleteKeyWord = async () => {
     let result = []
     rowSelected.map(id => {
       words.filter(item => {
@@ -90,8 +99,15 @@ export default function DataTable(props) {
         }
       })
     })
-    console.log({ result })
     setLocalStorage({ key: 'key_words_deleted', value: result })
+    let keyWordsDeleted = getLocalStorage({ key: 'key_words_deleted' })
+
+    let resultWordsDeleted = await deleteApi({ url: '/key_words/delete', data: [keyWordsDeleted] })
+    let { isUpdate } = resultWordsDeleted.data
+    if (isUpdate) {
+      props.setOpenShowMessage(true)
+      getKeyWords()
+    }
   }
 
   return (
@@ -114,7 +130,7 @@ export default function DataTable(props) {
       {rowSelected.length ?
         <Message>
           <Message.Header>{rowSelected.length > 1 ? 'Excluir linhas selecionadas?' : 'Excluir linha selecionada?'}</Message.Header>
-          <Button startIcon={<DeleteForeverIcon />} variant="contained" color="secondary" size='small' onClick={handleDeleteKeyWord}>
+          <Button startIcon={<DeleteForeverIcon />} variant="contained" color="secondary" size='small' onClick={() => handleDeleteKeyWord()}>
             {`Excluir(${rowSelected.length > 1 ? `${rowSelected.length} linhas` : `${rowSelected.length} linha`})`}
           </Button>
         </Message> : <></>}

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import './App.css';
 import clsx from 'clsx';
 import Grid from '@material-ui/core/Grid';
@@ -19,6 +19,8 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import DialogKeyWords from './dialogKeyWords'
 import Tootip from '@material-ui/core/Tooltip'
+/** Primeface React */
+import MessageUser from './messageUser'
 
 /** Socket */
 import socketIO from 'socket.io-client'
@@ -67,6 +69,8 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [openShowMessage, setOpenShowMessage] = React.useState(false);
+  const toast = useRef(null);
   /** Socket State */
   const [socketQrCode, setSocketQrCode] = React.useState({ qr_code_base64: null })
   const [socketStatusSession, setSocketStatusSession] = React.useState({ statusSession: null })
@@ -109,7 +113,6 @@ function App() {
 
   return (
     <div>
-      
       <Grid container>
         <Grid>
           <DrawerStyled
@@ -183,8 +186,11 @@ function App() {
         </Grid>
       </Grid>
 
-      {isVisibleDialogKeyWords && <DialogKeyWords visible={isVisibleDialogKeyWords} setVisible={setIsVisibleKeyWords}/>}      
-
+      {isVisibleDialogKeyWords && <DialogKeyWords 
+                                                  visible={isVisibleDialogKeyWords} 
+                                                  setOpenShowMessage={setOpenShowMessage}
+                                                  setVisible={setIsVisibleKeyWords}/>}      
+      {openShowMessage && <MessageUser open={openShowMessage} setOpen={setOpenShowMessage} severity={'success'} message={'Atualizado!'}/>}     
     </div>
   );
 }

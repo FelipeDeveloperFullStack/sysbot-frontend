@@ -3,7 +3,6 @@ import { withStyles } from '@material-ui/core/styles'
 import Dialog from '@material-ui/core/Dialog'
 import MuiDialogTitle from '@material-ui/core/DialogTitle'
 import MuiDialogContent from '@material-ui/core/DialogContent'
-import MuiDialogActions from '@material-ui/core/DialogActions'
 import Typography from '@material-ui/core/Typography'
 import DataGrid from '../datagrid'
 /** Icon */
@@ -51,12 +50,12 @@ export default function DialogKeyWords(props) {
 
   return (
     <div>
-      <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={props.visible} fullWidth maxWidth={'xs'}>
+      <Dialog  onClose={handleClose} aria-labelledby="customized-dialog-title" open={props.visible} fullWidth maxWidth={'md'}>
         <DialogTitle id="customized-dialog-title" onClose={handleClose}>
           Gerenciamento de palavras chaves
         </DialogTitle>
-        <DialogContent dividers>
-          <DataGrid />
+        <DialogContent id='dialogID' dividers >
+          <DataGrid showMessage={props.showMessage} setOpenShowMessage={props.setOpenShowMessage}/>
         </DialogContent>
       </Dialog>
     </div>
