@@ -22,6 +22,7 @@ import Tootip from '@material-ui/core/Tooltip'
 /** Primeface React */
 import MessageUser from './messageUser'
 import QRCodeAuth from './qrcodeAuth'
+import _ from 'lodash'
 
 /** Socket */
 import socketIO from 'socket.io-client'
@@ -84,7 +85,7 @@ function App() {
   let listStatusSuccess = ['isLogged','qrReadSuccess','chatsAvailable']
 
   useEffect(() => {
-    const socket = socketIO('http://localhost:9999')
+    const socket = socketIO(process.env.REACT_APP_URL)
     socket.on('socket_whatsapp', data => {
       setSocketQrCode({
         ...socketQrCode,
@@ -105,13 +106,24 @@ function App() {
     })
 
     socket.on('allMessagesWp', data => {
+      data = _.reverse(data)
       setSocketAllMessages(data)
     })
+
+    console.log({env: process.env.REACT_APP_URL})
 
     localStorage.setItem('statusSessionMessageButtom', JSON.stringify(false))
     // CLEAN UP THE EFFECT
     return () => socket.disconnect()
   }, [])
+
+  useEffect(() => {
+    const socket = socketIO(process.env.REACT_APP_URL)
+    socket.on('allMessagesWp', data => {
+      data = _.reverse(data)
+      setSocketAllMessages(data)
+    })
+  },[listStatusSuccess.includes(socketStatusSession.statusSession)])
 
   const onClickIniciarConexaoWhatsapp = async () => {
     localStorage.setItem('statusSessionMessageButtom', JSON.stringify(true))
