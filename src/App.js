@@ -1,22 +1,22 @@
 import React, { useEffect, useRef } from 'react'
-import './App.css';
-import clsx from 'clsx';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import { makeStyles } from '@material-ui/core/styles';
+import './App.css'
+import clsx from 'clsx'
+import Grid from '@material-ui/core/Grid'
+import Paper from '@material-ui/core/Paper'
+import { makeStyles } from '@material-ui/core/styles'
 import { DrawerStyled } from './sidebar/style'
 import 'semantic-ui-css/semantic.min.css'
 import { iniciarConexaoWhatsapp } from './services/auth'
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
+import AppBar from '@material-ui/core/AppBar'
+import Toolbar from '@material-ui/core/Toolbar'
+import Typography from '@material-ui/core/Typography'
 import { listStatusMessageData } from './messageData'
-import MobileOffIcon from '@material-ui/icons/MobileOff';
-import MobileFriendlyIcon from '@material-ui/icons/MobileFriendly';
-import SpellcheckIcon from '@material-ui/icons/Spellcheck';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
+import MobileOffIcon from '@material-ui/icons/MobileOff'
+import MobileFriendlyIcon from '@material-ui/icons/MobileFriendly'
+import SpellcheckIcon from '@material-ui/icons/Spellcheck'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemIcon from '@material-ui/core/ListItemIcon'
 import DialogKeyWords from './dialogKeyWords'
 import Tootip from '@material-ui/core/Tooltip'
 /** Primeface React */
@@ -28,7 +28,7 @@ import socketIO from 'socket.io-client'
 
 import MessageContent from './messageContent'
 
-const drawerWidth = 200;
+const drawerWidth = 200
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -65,19 +65,23 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     justifyContent: 'center'
   }
-}));
+}))
 
 function App() {
-  const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
-  const [openShowMessage, setOpenShowMessage] = React.useState(false);
-  const toast = useRef(null);
+  const classes = useStyles()
+  const [open, setOpen] = React.useState(false)
+  const [openShowMessage, setOpenShowMessage] = React.useState(false)
+  const [openShowMessageSocketNotificationIsOpen, setOpenShowMessageSocketNotificationIsOpen] = React.useState(false)
+  const [openShowMessageSocketNotificationMessage, setOpenShowMessageSocketNotificationMessage] = React.useState({ message: '' })
+  const toast = useRef(null)
   /** Socket State */
   const [socketQrCode, setSocketQrCode] = React.useState({ qr_code_base64: null })
+  const [socketAllMessages, setSocketAllMessages] = React.useState([])
   const [socketStatusSession, setSocketStatusSession] = React.useState({ statusSession: null })
   const [statusSessionMessageButtom, setStatusSessionMessageButtom] = React.useState(null)
   const [isVisibleDialogKeyWords, setIsVisibleKeyWords] = React.useState(false)
   let listStatus = ['notLogged', 'browserClose', 'qrReadFail', 'autocloseCalled', 'desconnectedMobile', 'deleteToken', 'deviceNotConnected', 'serverWssNotConnected', 'noOpenBrowser']
+  let listStatusSuccess = ['isLogged','qrReadSuccess','chatsAvailable']
 
   useEffect(() => {
     const socket = socketIO('http://localhost:9999')
@@ -95,9 +99,18 @@ function App() {
       })
     })
 
+    socket.on('newMessageWp', data => {
+      setOpenShowMessageSocketNotificationIsOpen(true)
+      setOpenShowMessageSocketNotificationMessage({ message: 'Nova mensagem capturada.' })
+    })
+
+    socket.on('allMessagesWp', data => {
+      setSocketAllMessages(data)
+    })
+
     localStorage.setItem('statusSessionMessageButtom', JSON.stringify(false))
     // CLEAN UP THE EFFECT
-    return () => socket.disconnect();
+    return () => socket.disconnect()
   }, [])
 
   const onClickIniciarConexaoWhatsapp = async () => {
@@ -133,7 +146,7 @@ function App() {
               <ListItem button onClick={() => setIsVisibleKeyWords(true)}>
                 <Tootip title='Clique aqui para gerenciar as palavras chaves!'>
                   <ListItemIcon>
-                    <SpellcheckIcon style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'white' }}/>
+                    <SpellcheckIcon style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'white' }} />
                   </ListItemIcon>
                 </Tootip>
               </ListItem>
@@ -146,55 +159,49 @@ function App() {
               <AppBar position="static" className={classes.appTopBar}>
                 <Toolbar>
 
-                  {(listStatus.includes(socketStatusSession.statusSession) || !socketStatusSession.statusSession) ? 
-                    <MobileOffIcon style={{ color: 'black', position: 'relative', right: '6px', fontSize: '48px' }}/> :
-                    <MobileFriendlyIcon style={{ color: 'white', position: 'relative', right: '6px', fontSize: '48px' }}/>}
+                  {(listStatus.includes(socketStatusSession.statusSession) || !socketStatusSession.statusSession) ?
+                    <MobileOffIcon style={{ color: 'black', position: 'relative', right: '6px', fontSize: '48px' }} /> :
+                    <MobileFriendlyIcon style={{ color: 'white', position: 'relative', right: '6px', fontSize: '48px' }} />}
 
                   <Typography variant="h6" className={classes.title}>
                     {listStatusMessageData[socketStatusSession.statusSession]}
                   </Typography>
 
                   <Typography variant="h6">
-                     SysBot Whatsapp
+                    SysBot Whatsapp
                   </Typography>
 
                 </Toolbar>
               </AppBar>
             </div>
-            {(listStatus.includes(socketStatusSession.statusSession) || !socketStatusSession.statusSession) && 
-              <QRCodeAuth qr_code_base64={socketQrCode.qr_code_base64} 
-                          statusSession={socketStatusSession.statusSession} 
-                          statusSessionMessageButtom={statusSessionMessageButtom}
-                          setStatusSessionMessageButtom={setStatusSessionMessageButtom}
-                          onClickIniciarConexaoWhatsapp={onClickIniciarConexaoWhatsapp}/>
+            {(listStatus.includes(socketStatusSession.statusSession) || !socketStatusSession.statusSession) &&
+              <QRCodeAuth qr_code_base64={socketQrCode.qr_code_base64}
+                statusSession={socketStatusSession.statusSession}
+                statusSessionMessageButtom={statusSessionMessageButtom}
+                setStatusSessionMessageButtom={setStatusSessionMessageButtom}
+                onClickIniciarConexaoWhatsapp={onClickIniciarConexaoWhatsapp} />
             }
             <main style={{
               overflowY: 'scroll',
               height: '500px'
             }}>
-              {console.log({status: socketStatusSession.statusSession})}
-              <MessageContent />
-              <MessageContent />
-              <MessageContent />
-              <MessageContent />
-              <MessageContent />
-              <MessageContent />
-              <MessageContent />
-              <MessageContent />
-              <MessageContent />
-              <MessageContent />
+              {console.log({ status: socketStatusSession.statusSession })}
+              {listStatusSuccess.includes(socketStatusSession.statusSession) && <MessageContent messages={socketAllMessages}/>}
             </main>
           </Paper>
         </Grid>
       </Grid>
 
-      {isVisibleDialogKeyWords && <DialogKeyWords 
-                                                  visible={isVisibleDialogKeyWords} 
-                                                  setOpenShowMessage={setOpenShowMessage}
-                                                  setVisible={setIsVisibleKeyWords}/>}      
-      {openShowMessage && <MessageUser open={openShowMessage} setOpen={setOpenShowMessage} severity={'success'} message={'Atualizado!'}/>}     
+      {isVisibleDialogKeyWords && 
+      <DialogKeyWords
+        visible={isVisibleDialogKeyWords}
+        setOpenShowMessage={setOpenShowMessage}
+        setVisible={setIsVisibleKeyWords} />}
+
+      {openShowMessage && <MessageUser open={openShowMessage} setOpen={setOpenShowMessage} severity={'success'} message={'Atualizado!'} />}
+      {openShowMessageSocketNotificationIsOpen && <MessageUser open={openShowMessageSocketNotificationIsOpen} setOpen={setOpenShowMessageSocketNotificationIsOpen} severity={'info'} message={openShowMessageSocketNotificationMessage.message} />}
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

@@ -38,7 +38,7 @@ export default function QrCodeAuth(props) {
           {(props.statusSession === null || props.statusSession === 'qrReadFail') &&
             <Message>
               <Message.Header style={{ paddingTop: '5px', paddingBottom: '10px' }}>
-                {props.statusSession === 'qrReadFail' ? <div>A conexão falhou! <div>Isso por ocorrer por falha de conexão com seu smartphone ou com a internet local.</div> Tente novamente.</div> : 'Clique no botão abaixo para realizar a conexão com o Whatsapp!'}
+                {props.statusSession === 'qrReadFail' ? <div>A conexão falhou! <div>Isso pode ocorrer por falha de conexão com seu smartphone ou com a internet local.</div> Tente novamente.</div> : 'Clique no botão abaixo para realizar a conexão com o Whatsapp!'}
               </Message.Header>
               <Button
                 variant="contained"
