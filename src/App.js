@@ -21,6 +21,7 @@ import DialogKeyWords from './dialogKeyWords'
 import Tootip from '@material-ui/core/Tooltip'
 /** Primeface React */
 import MessageUser from './messageUser'
+import QRCodeAuth from './qrcodeAuth'
 
 /** Socket */
 import socketIO from 'socket.io-client'
@@ -160,17 +161,18 @@ function App() {
                 </Toolbar>
               </AppBar>
             </div>
-            {/* {(listStatus.includes(socketStatusSession.statusSession) || !socketStatusSession.statusSession) && 
+            {(listStatus.includes(socketStatusSession.statusSession) || !socketStatusSession.statusSession) && 
               <QRCodeAuth qr_code_base64={socketQrCode.qr_code_base64} 
                           statusSession={socketStatusSession.statusSession} 
                           statusSessionMessageButtom={statusSessionMessageButtom}
                           setStatusSessionMessageButtom={setStatusSessionMessageButtom}
                           onClickIniciarConexaoWhatsapp={onClickIniciarConexaoWhatsapp}/>
-            } */}
+            }
             <main style={{
               overflowY: 'scroll',
               height: '500px'
             }}>
+              {console.log({status: socketStatusSession.statusSession})}
               <MessageContent />
               <MessageContent />
               <MessageContent />
