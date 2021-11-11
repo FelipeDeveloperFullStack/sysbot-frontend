@@ -1,33 +1,39 @@
 import React, { useEffect, useRef } from 'react'
 import './App.css'
+/** Components */
 import clsx from 'clsx'
+import { DrawerStyled } from './sidebar/style'
+import MessageContent from './messageContent'
+import { listStatusMessageData } from './messageData'
+import DialogKeyWords from './dialogKeyWords'
+/** Services */
+import { iniciarConexaoWhatsapp } from './services/auth'
+import { postApi } from './services/api'
+/** Semantic */
+import 'semantic-ui-css/semantic.min.css'
+/** Material UI */
 import Grid from '@material-ui/core/Grid'
 import Paper from '@material-ui/core/Paper'
 import { makeStyles } from '@material-ui/core/styles'
-import { DrawerStyled } from './sidebar/style'
-import 'semantic-ui-css/semantic.min.css'
-import { iniciarConexaoWhatsapp } from './services/auth'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
-import { listStatusMessageData } from './messageData'
 import MobileOffIcon from '@material-ui/icons/MobileOff'
 import MobileFriendlyIcon from '@material-ui/icons/MobileFriendly'
 import SpellcheckIcon from '@material-ui/icons/Spellcheck'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
-import DialogKeyWords from './dialogKeyWords'
 import Tootip from '@material-ui/core/Tooltip'
 /** Primeface React */
 import MessageUser from './messageUser'
 import QRCodeAuth from './qrcodeAuth'
 import _ from 'lodash'
-
+/** Components */
+import MessageResponder from './messageResponder'
 /** Socket */
 import socketIO from 'socket.io-client'
 
-import MessageContent from './messageContent'
 
 const drawerWidth = 200
 
@@ -82,7 +88,9 @@ function App() {
   const [statusSessionMessageButtom, setStatusSessionMessageButtom] = React.useState(null)
   const [isVisibleDialogKeyWords, setIsVisibleKeyWords] = React.useState(false)
   let listStatus = ['notLogged', 'browserClose', 'qrReadFail', 'autocloseCalled', 'desconnectedMobile', 'deleteToken', 'deviceNotConnected', 'serverWssNotConnected', 'noOpenBrowser']
-  let listStatusSuccess = ['isLogged','qrReadSuccess','chatsAvailable']
+  let listStatusSuccess = ['isLogged', 'qrReadSuccess', 'chatsAvailable']
+  const [visibleDialogResponder, setVisibleDialogResponder] = React.useState(false)
+  const [data, setData] = React.useState()
 
   useEffect(() => {
     const socket = socketIO(process.env.REACT_APP_URL)
@@ -110,9 +118,11 @@ function App() {
       setSocketAllMessages(data)
     })
 
-    console.log({env: process.env.REACT_APP_URL})
-
     localStorage.setItem('statusSessionMessageButtom', JSON.stringify(false))
+
+    /** Check Status */
+    checkStatus()
+
     // CLEAN UP THE EFFECT
     return () => socket.disconnect()
   }, [])
@@ -123,7 +133,19 @@ function App() {
       data = _.reverse(data)
       setSocketAllMessages(data)
     })
-  },[listStatusSuccess.includes(socketStatusSession.statusSession)])
+  }, [listStatusSuccess.includes(socketStatusSession.statusSession)])
+
+  const checkStatus = () => {
+    const socket = socketIO(process.env.REACT_APP_URL)
+    socket.on('checkStatus', (data) => {
+      console.log({ isConnected: data })
+    })
+  }
+
+  const handleButtonResponder = ({ data }) => {
+    setVisibleDialogResponder(true)
+    setData(data)
+ }
 
   const onClickIniciarConexaoWhatsapp = async () => {
     localStorage.setItem('statusSessionMessageButtom', JSON.stringify(true))
@@ -135,6 +157,14 @@ function App() {
     let resultItemLocalStorage = localStorage.getItem('statusSessionMessageButtom')
     resultItemLocalStorage = JSON.parse(localStorage.getItem('statusSessionMessageButtom'))
     setStatusSessionMessageButtom(resultItemLocalStorage)
+  }
+
+  const responderMenssage = async ({ data }) => {
+    try {
+      await postApi({ url: '/responder/whatsapp', data })
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   return (
@@ -197,19 +227,20 @@ function App() {
               overflowY: 'scroll',
               height: '500px'
             }}>
-              {console.log({ status: socketStatusSession.statusSession })}
-              {listStatusSuccess.includes(socketStatusSession.statusSession) && <MessageContent messages={socketAllMessages}/>}
+             <MessageContent messages={socketAllMessages} handleButtonResponder={handleButtonResponder}/>
+              {/* {listStatusSuccess.includes(socketStatusSession.statusSession) && <MessageContent messages={socketAllMessages} />} */}
             </main>
           </Paper>
         </Grid>
       </Grid>
 
-      {isVisibleDialogKeyWords && 
-      <DialogKeyWords
-        visible={isVisibleDialogKeyWords}
-        setOpenShowMessage={setOpenShowMessage}
-        setVisible={setIsVisibleKeyWords} />}
+      {isVisibleDialogKeyWords &&
+        <DialogKeyWords
+          visible={isVisibleDialogKeyWords}
+          setOpenShowMessage={setOpenShowMessage}
+          setVisible={setIsVisibleKeyWords} />}
 
+      {visibleDialogResponder && <MessageResponder responderMenssage={responderMenssage} visible={visibleDialogResponder} setVisible={setVisibleDialogResponder} {...data}/>}
       {openShowMessage && <MessageUser open={openShowMessage} setOpen={setOpenShowMessage} severity={'success'} message={'Atualizado!'} />}
       {openShowMessageSocketNotificationIsOpen && <MessageUser open={openShowMessageSocketNotificationIsOpen} setOpen={setOpenShowMessageSocketNotificationIsOpen} severity={'info'} message={openShowMessageSocketNotificationMessage.message} />}
     </div>

@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react'
+import React, { memo } from 'react'
 /** Semantic */
-import { Feed, Icon } from 'semantic-ui-react'
+import { Feed } from 'semantic-ui-react'
 import { Message } from 'semantic-ui-react'
 /** Material ui */
-import TextField from '@material-ui/core/TextField'
 import Button from '@material-ui/core/Button'
 import Avatar from '@material-ui/core/Avatar';
+import ChatIcon from '@material-ui/icons/Chat';
+import Paper from '@material-ui/core/Paper';
 
-export default function MessageContent(props) {
+function MessageContent(props) {
   return (
     <>
       {props.messages.map(item => {
@@ -16,7 +17,7 @@ export default function MessageContent(props) {
             <Feed>
               <Feed.Event>
                 <Feed.Label>
-                  <Avatar>{String(item.displayName).substr(0,1)}</Avatar>
+                  <Avatar>{String(item.displayName).substr(0, 1)}</Avatar>
                 </Feed.Label>
                 <Feed.Content>
                   <Feed.Summary>
@@ -24,12 +25,14 @@ export default function MessageContent(props) {
                     <Feed.Date>{item.created_at}</Feed.Date>
                   </Feed.Summary>
                   <Feed.Extra text>
-                    {item.body}
+                    <Paper elevation={3} style={{ padding: '10px', width: '80vw' }}>
+                      {item.body}
+                    </Paper>
                   </Feed.Extra>
                   {item.isAnswered === false &&
                     <Feed.Meta style={{ display: 'flex', flexDirection: 'row' }}>
-                      <TextField id="filled-basic" label="Digite aqui sua resposta" variant="filled" multiline size='small' style={{ maxWidth: '90%', minWidth: '90%' }} />
-                      <Button variant="contained" size='small'>Responder</Button>
+                      {/* <TextField id="filled-basic" label="Digite aqui sua resposta" variant="filled" multiline size='small' style={{ maxWidth: '90%', minWidth: '90%' }} /> */}
+                      <Button variant="contained" size='small' startIcon={<ChatIcon />} onClick={() => props.handleButtonResponder({ data: item })}>Responder</Button>
                     </Feed.Meta>}
                   {item.isAnswered === true &&
                     <Message info>
@@ -41,16 +44,11 @@ export default function MessageContent(props) {
           </div>
         )
       })}
+
+      
+
     </>
   )
 }
-  // else {
-  //   return (
-  //     <>
-  //       <Message info>
-  //         <Message.Header style={{paddingBottom: '10px'}}>Carregando...</Message.Header>
-  //         <LinearProgress />
-  //       </Message>
-  //     </>
-  //   )
-  // }
+
+export default memo(MessageContent)
