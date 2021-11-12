@@ -8,7 +8,7 @@ import { listStatusMessageData } from './messageData'
 import DialogKeyWords from './dialogKeyWords'
 /** Services */
 import { iniciarConexaoWhatsapp } from './services/auth'
-import { postApi } from './services/api'
+import { postApi, getApi } from './services/api'
 /** Semantic */
 import 'semantic-ui-css/semantic.min.css'
 /** Material UI */
@@ -163,7 +163,8 @@ function App() {
 
   const responderMenssage = async ({ data }) => {
     try {
-      await postApi({ url: '/responder/whatsapp', data })
+      // await postApi({ url: '/responder/whatsapp', data })
+      await getApi({ url: '/responder/whatsapp' })
       setVisibleDialogResponder(false)
       alert('Mensagem enviada para o destinatário!', '', 'success')
     } catch (error) {
