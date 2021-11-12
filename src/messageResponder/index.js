@@ -78,7 +78,7 @@ export default function MessageResponderDialog(props) {
           <InputBase value={props.body} multiline size='small' style={{ maxWidth: '90%', minWidth: '90%' }} />
         </DialogContent>
         <div>
-          <TextField value={message} onChange={(event) => setMessage(event.target.value)} label="Digite aqui sua resposta [Utilize a tecla ENTER para pular de linha]" variant="filled" multiline size='small' fullWidth focused />
+          <TextField value={message} onChange={(event) => setMessage(event.target.value)} label="Digite aqui sua resposta [Utilize a tecla ENTER para pular de linha]" variant="filled" size='small' fullWidth/>
         </div>
         <DialogActions>
           <Button variant='contained' onClick={() => props.responderMenssage({ data: { props, message }})} color="primary" size='small' startIcon={<SendIcon />}>Enviar resposta</Button>

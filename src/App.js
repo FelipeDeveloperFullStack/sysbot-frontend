@@ -33,6 +33,8 @@ import _ from 'lodash'
 import MessageResponder from './messageResponder'
 /** Socket */
 import socketIO from 'socket.io-client'
+/** Alert */
+import alert from 'sweetalert'
 
 
 const drawerWidth = 200
@@ -145,7 +147,7 @@ function App() {
   const handleButtonResponder = ({ data }) => {
     setVisibleDialogResponder(true)
     setData(data)
- }
+  }
 
   const onClickIniciarConexaoWhatsapp = async () => {
     localStorage.setItem('statusSessionMessageButtom', JSON.stringify(true))
@@ -162,7 +164,10 @@ function App() {
   const responderMenssage = async ({ data }) => {
     try {
       await postApi({ url: '/responder/whatsapp', data })
+      setVisibleDialogResponder(false)
+      alert('Mensagem enviada para o destinatário!', '', 'success')
     } catch (error) {
+      alert('Ops! :( Um erro ocorreu! Não foi possível enviar sua mensagem!', error, 'error')
       console.error(error)
     }
   }
@@ -227,7 +232,7 @@ function App() {
               overflowY: 'scroll',
               height: '500px'
             }}>
-             <MessageContent messages={socketAllMessages} handleButtonResponder={handleButtonResponder}/>
+              <MessageContent messages={socketAllMessages} handleButtonResponder={handleButtonResponder} />
               {/* {listStatusSuccess.includes(socketStatusSession.statusSession) && <MessageContent messages={socketAllMessages} />} */}
             </main>
           </Paper>
@@ -240,7 +245,7 @@ function App() {
           setOpenShowMessage={setOpenShowMessage}
           setVisible={setIsVisibleKeyWords} />}
 
-      {visibleDialogResponder && <MessageResponder responderMenssage={responderMenssage} visible={visibleDialogResponder} setVisible={setVisibleDialogResponder} {...data}/>}
+      {visibleDialogResponder && <MessageResponder responderMenssage={responderMenssage} visible={visibleDialogResponder} setVisible={setVisibleDialogResponder} {...data} />}
       {openShowMessage && <MessageUser open={openShowMessage} setOpen={setOpenShowMessage} severity={'success'} message={'Atualizado!'} />}
       {openShowMessageSocketNotificationIsOpen && <MessageUser open={openShowMessageSocketNotificationIsOpen} setOpen={setOpenShowMessageSocketNotificationIsOpen} severity={'info'} message={openShowMessageSocketNotificationMessage.message} />}
     </div>
