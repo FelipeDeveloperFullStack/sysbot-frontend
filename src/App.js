@@ -24,6 +24,7 @@ import SpellcheckIcon from '@material-ui/icons/Spellcheck'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
+import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import Tootip from '@material-ui/core/Tooltip'
 /** Primeface React */
 import MessageUser from './messageUser'
@@ -35,7 +36,6 @@ import MessageResponder from './messageResponder'
 import socketIO from 'socket.io-client'
 /** Alert */
 import alert from 'sweetalert'
-
 
 const drawerWidth = 200
 
@@ -87,6 +87,7 @@ function App() {
   const [socketQrCode, setSocketQrCode] = React.useState({ qr_code_base64: null })
   const [socketAllMessages, setSocketAllMessages] = React.useState([])
   const [socketStatusSession, setSocketStatusSession] = React.useState({ statusSession: null })
+  const [socketStatusBatteryChange, setSocketStatusBatteryChange] = React.useState({ battery: null, plugged: null })
   const [statusSessionMessageButtom, setStatusSessionMessageButtom] = React.useState(null)
   const [isVisibleDialogKeyWords, setIsVisibleKeyWords] = React.useState(false)
   let listStatus = ['notLogged', 'browserClose', 'qrReadFail', 'autocloseCalled', 'desconnectedMobile', 'deleteToken', 'deviceNotConnected', 'serverWssNotConnected', 'noOpenBrowser']
@@ -97,6 +98,7 @@ function App() {
   useEffect(() => {
     const socket = socketIO(process.env.REACT_APP_URL)
     socket.on('socket_whatsapp', data => {
+      
       setSocketQrCode({
         ...socketQrCode,
         qr_code_base64: data.qr_code_base64
@@ -107,6 +109,13 @@ function App() {
       setSocketStatusSession({
         ...socketStatusSession,
         statusSession: data.statusSession
+      })
+    })
+
+    socket.on('socket_whatspp_change_battery', data => {
+      setSocketStatusBatteryChange({
+        battery: data.battery,
+        plugged: data.plugged
       })
     })
 
@@ -149,6 +158,10 @@ function App() {
     setData(data)
   }
 
+   const logout = async () => {
+     await getApi({ url: '/logout' })
+   }
+
   const onClickIniciarConexaoWhatsapp = async () => {
     localStorage.setItem('statusSessionMessageButtom', JSON.stringify(true))
     setStatusSessionMessageButtom(true)
@@ -162,6 +175,7 @@ function App() {
   }
 
   const responderMenssage = async ({ data }) => {
+    
     try {
       // await postApi({ url: '/responder/whatsapp', data })
       await getApi({ url: '/responder/whatsapp' })
@@ -198,6 +212,14 @@ function App() {
                   </ListItemIcon>
                 </Tootip>
               </ListItem>
+              {!socketStatusSession.statusSession || socketStatusSession.statusSession === 'isLogged' &&
+              <ListItem button onClick={logout}>
+                <Tootip title='Clique aqui para desconectar do Whatsapp'>
+                  <ListItemIcon>
+                    <PowerSettingsNewIcon style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'black' }} />
+                  </ListItemIcon>
+                </Tootip>
+              </ListItem>}
             </List>
           </DrawerStyled>
         </Grid>
@@ -224,15 +246,16 @@ function App() {
             </div>
             {(listStatus.includes(socketStatusSession.statusSession) || !socketStatusSession.statusSession) &&
               <QRCodeAuth qr_code_base64={socketQrCode.qr_code_base64}
-                statusSession={socketStatusSession.statusSession}
-                statusSessionMessageButtom={statusSessionMessageButtom}
-                setStatusSessionMessageButtom={setStatusSessionMessageButtom}
-                onClickIniciarConexaoWhatsapp={onClickIniciarConexaoWhatsapp} />
+              statusSession={socketStatusSession.statusSession}
+              statusSessionMessageButtom={statusSessionMessageButtom}
+              setStatusSessionMessageButtom={setStatusSessionMessageButtom}
+              onClickIniciarConexaoWhatsapp={onClickIniciarConexaoWhatsapp} />
             }
             <main style={{
               overflowY: 'scroll',
               height: '500px'
             }}>
+              {socketStatusBatteryChange.battery && <div>Battery: {socketStatusBatteryChange.battery} - Plugged: {socketStatusBatteryChange.plugged}</div>}  
               <MessageContent messages={socketAllMessages} handleButtonResponder={handleButtonResponder} />
               {/* {listStatusSuccess.includes(socketStatusSession.statusSession) && <MessageContent messages={socketAllMessages} />} */}
             </main>

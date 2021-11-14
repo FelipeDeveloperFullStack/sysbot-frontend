@@ -2,7 +2,8 @@ import React, { useEffect } from 'react'
 import Button from '@material-ui/core/Button'
 import MobileOffIcon from '@material-ui/icons/MobileOff'
 import { Message } from 'semantic-ui-react'
-
+/** QRCode Component */
+import QRCode from 'qrcode.react'
 
 export default function QrCodeAuth(props) {
 
@@ -35,7 +36,7 @@ export default function QrCodeAuth(props) {
               <div id='step03' style={{ paddingBottom: '20px', fontFamily: 'sans-serif' }}>3. Aponte seu celular para essa tela para capturar o código.</div>
             </>
           }
-          {(props.statusSession === null || props.statusSession === 'qrReadFail') &&
+          {(props.statusSession === null || props.statusSession === 'desconnectedMobile') &&
             <Message>
               <Message.Header style={{ paddingTop: '5px', paddingBottom: '10px' }}>
                 {props.statusSession === 'qrReadFail' ? <div>A conexão falhou! <div>Isso pode ocorrer por falha de conexão com seu smartphone ou com a internet local.</div> Tente novamente.</div> : 'Clique no botão abaixo para realizar a conexão com o Whatsapp!'}
@@ -50,7 +51,7 @@ export default function QrCodeAuth(props) {
             </Message>}
         </div>
         <div id='column02'>
-          {props.statusSession === 'notLogged' && (props.qr_code_base64 && <img src={props.qr_code_base64} />)}
+          {props.statusSession === 'notLogged' && (props.qr_code_base64 && <QRCode value={props.qr_code_base64 ? props.qr_code_base64 : 'null'}/>)}
         </div>
       </div>
     </>

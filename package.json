@@ -15,6 +15,7 @@
     "lodash": "^4.17.21",
     "primeicons": "^4.1.0",
     "primereact": "^7.0.0-rc.2",
+    "qrcode.react": "^1.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.6",
