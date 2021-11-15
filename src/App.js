@@ -287,9 +287,9 @@ function App() {
                 <ListItem>
                   <Tootip title={`Atenção a bateria do seu smartphone está com ${socketStatusBatteryChange.battery}%`}>
                     <ListItemIcon style={{ display: 'flex', flexDirection: 'column' }}>
-                      {socketStatusBatteryChange.battery <= 50 && <Battery50 style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'white' }} />}
-                      {socketStatusBatteryChange.battery <= 20 && <Battery20 style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'white' }} />}
-                      {socketStatusBatteryChange.battery <= 5 && <Battery5 style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'white' }} />}
+                      {(socketStatusBatteryChange.battery > 20 && socketStatusBatteryChange.battery <= 50) && <Battery50 style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'white' }} />}
+                      {(socketStatusBatteryChange.battery > 10 && socketStatusBatteryChange.battery <= 20) && <Battery20 style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'white' }} />}
+                      {(socketStatusBatteryChange.battery > 1 && socketStatusBatteryChange.battery <= 10) && <Battery5 style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'white' }} />}
                       <div style={{ position: 'relative', left: '5px', bottom: '6px', fontSize: '12px', fontWeight: 'bold' }}>{socketStatusBatteryChange.battery}%</div>
                     </ListItemIcon>
                   </Tootip>
