@@ -343,7 +343,7 @@ function App() {
                   <Tab label="Todas as mensagens" />
                 </Tabs>}
               <TabPanel value={valueTab} index={0}>
-                {isShowLinerProgress ? <LinearProgress /> : <MessageContent messages={socketAllMessages} handleButtonResponder={handleButtonResponder} />}
+                 <MessageContent messages={socketAllMessages} handleButtonResponder={handleButtonResponder} />
               </TabPanel>
               <TabPanel value={valueTab} index={1}>
                 {isShowLinerProgress ? <LinearProgress /> : <MessageContent messages={socketAllMessages} handleButtonResponder={handleButtonResponder} />}
