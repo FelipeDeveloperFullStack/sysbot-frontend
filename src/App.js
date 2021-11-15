@@ -24,8 +24,17 @@ import SpellcheckIcon from '@material-ui/icons/Spellcheck'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
+import Battery50 from '@material-ui/icons/BatteryCharging50';
+import Battery20 from '@material-ui/icons/BatteryCharging20';
+import Battery5 from '@material-ui/icons/BatteryAlert';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
+import ServerOnline from '@material-ui/icons/CloudQueue';
+import ServerOffline from '@material-ui/icons/CloudOff';
 import Tootip from '@material-ui/core/Tooltip'
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Box from '@material-ui/core/Box';
+import LinearProgress from '@material-ui/core/LinearProgress'
 /** Primeface React */
 import MessageUser from './messageUser'
 import QRCodeAuth from './qrcodeAuth'
@@ -76,29 +85,53 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box p={3}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
 function App() {
   const classes = useStyles()
   const [open, setOpen] = React.useState(false)
   const [openShowMessage, setOpenShowMessage] = React.useState(false)
   const [openShowMessageSocketNotificationIsOpen, setOpenShowMessageSocketNotificationIsOpen] = React.useState(false)
   const [openShowMessageSocketNotificationMessage, setOpenShowMessageSocketNotificationMessage] = React.useState({ message: '' })
-  const toast = useRef(null)
+  const [isShowLinerProgress, setIsShowLineProgress] = React.useState(false)
   /** Socket State */
   const [socketQrCode, setSocketQrCode] = React.useState({ qr_code_base64: null })
   const [socketAllMessages, setSocketAllMessages] = React.useState([])
+  const [socketAllTodayMessages, setSocketAllTodayMessages] = React.useState([])
   const [socketStatusSession, setSocketStatusSession] = React.useState({ statusSession: null })
   const [socketStatusBatteryChange, setSocketStatusBatteryChange] = React.useState({ battery: null, plugged: null })
   const [statusSessionMessageButtom, setStatusSessionMessageButtom] = React.useState(null)
+  const [isServerOnline, setIsServerOnline] = React.useState(true)
   const [isVisibleDialogKeyWords, setIsVisibleKeyWords] = React.useState(false)
   let listStatus = ['notLogged', 'browserClose', 'qrReadFail', 'autocloseCalled', 'desconnectedMobile', 'deleteToken', 'deviceNotConnected', 'serverWssNotConnected', 'noOpenBrowser']
   let listStatusSuccess = ['isLogged', 'qrReadSuccess', 'chatsAvailable']
   const [visibleDialogResponder, setVisibleDialogResponder] = React.useState(false)
   const [data, setData] = React.useState()
+  const [valueTab, setValueTab] = React.useState(0);
 
   useEffect(() => {
+
     const socket = socketIO(process.env.REACT_APP_URL)
     socket.on('socket_whatsapp', data => {
-      
+
       setSocketQrCode({
         ...socketQrCode,
         qr_code_base64: data.qr_code_base64
@@ -128,29 +161,45 @@ function App() {
       data = _.reverse(data)
       setSocketAllMessages(data)
     })
+    // socket.on('allMessagesToday', data => {
+    //   data = _.reverse(data)
+    //   setSocketAllTodayMessages(data)
+    // })
 
     localStorage.setItem('statusSessionMessageButtom', JSON.stringify(false))
 
     /** Check Status */
     checkStatus()
+    // Check Server is Online
+    checkServerIsOnline()
 
     // CLEAN UP THE EFFECT
     return () => socket.disconnect()
   }, [])
 
-  useEffect(() => {
-    const socket = socketIO(process.env.REACT_APP_URL)
-    socket.on('allMessagesWp', data => {
-      data = _.reverse(data)
-      setSocketAllMessages(data)
-    })
-  }, [listStatusSuccess.includes(socketStatusSession.statusSession)])
+  // useEffect(() => {
+  //   const socket = socketIO(process.env.REACT_APP_URL)
+  //   socket.on('allMessagesWp', data => {
+  //     data = _.reverse(data)
+  //     setSocketAllMessages(data)
+  //   })
+  // }, [listStatusSuccess.includes(socketStatusSession.statusSession)])
 
-  const checkStatus = () => {
-    const socket = socketIO(process.env.REACT_APP_URL)
-    socket.on('checkStatus', (data) => {
-      console.log({ isConnected: data })
-    })
+  const checkStatus = async () => {
+    await getApi({ url: '/check_status' })
+    // socket.ont('checkStatus', (data) => {
+    //   console.log({ isConnected: data })
+    // })
+  }
+
+  const checkServerIsOnline = async () => {
+    setInterval(async () => {
+      getApi({ url: '/check_server_isonline' }).then(result => {
+        setIsServerOnline(result.data.isOnline)
+      }).catch(error => {
+        setIsServerOnline(false)
+      })
+    }, 5000)
   }
 
   const handleButtonResponder = ({ data }) => {
@@ -158,9 +207,9 @@ function App() {
     setData(data)
   }
 
-   const logout = async () => {
-     await getApi({ url: '/logout' })
-   }
+  const logout = async () => {
+    await getApi({ url: '/logout' })
+  }
 
   const onClickIniciarConexaoWhatsapp = async () => {
     localStorage.setItem('statusSessionMessageButtom', JSON.stringify(true))
@@ -175,17 +224,30 @@ function App() {
   }
 
   const responderMenssage = async ({ data }) => {
-    
+
     try {
-      // await postApi({ url: '/responder/whatsapp', data })
-      await getApi({ url: '/responder/whatsapp' })
       setVisibleDialogResponder(false)
+      await postApi({ url: '/responder/whatsapp', data })
       alert('Mensagem enviada para o destinatário!', '', 'success')
     } catch (error) {
       alert('Ops! :( Um erro ocorreu! Não foi possível enviar sua mensagem!', error, 'error')
       console.error(error)
     }
   }
+
+  const handleChangeTab = async (event, newValue) => {
+    setValueTab(newValue)
+    if (newValue === 0) {
+      setIsShowLineProgress(true)
+      await getApi({ url: '/find_by_date' })
+      setIsShowLineProgress(false)
+    }
+    if (newValue === 1) {
+      setIsShowLineProgress(true)
+      await getApi({ url: '/listAllMessage' })
+      setIsShowLineProgress(false)
+    }
+  };
 
   return (
     <div>
@@ -212,14 +274,34 @@ function App() {
                   </ListItemIcon>
                 </Tootip>
               </ListItem>
-              {!socketStatusSession.statusSession || socketStatusSession.statusSession === 'isLogged' &&
-              <ListItem button onClick={logout}>
-                <Tootip title='Clique aqui para desconectar do Whatsapp'>
-                  <ListItemIcon>
-                    <PowerSettingsNewIcon style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'black' }} />
+              <ListItem>
+                <Tootip title={isServerOnline ? 'Bot funcionando! :)' : 'Ops! O bot por algum motivo não está funcionando! Reinicie o servidor!'}>
+                  <ListItemIcon style={{ display: 'flex', flexDirection: 'column' }}>
+                    {isServerOnline && <ServerOnline style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'white' }} />}
+                    {!isServerOnline && <ServerOffline style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'red' }} />}
+                    <div style={{ position: 'relative', left: '5px', bottom: '6px', fontSize: '12px', fontWeight: 'bold' }}>{isServerOnline ? 'On' : 'Off'}</div>
                   </ListItemIcon>
                 </Tootip>
-              </ListItem>}
+              </ListItem>
+              {socketStatusBatteryChange.battery && socketStatusBatteryChange.battery <= 50 &&
+                <ListItem>
+                  <Tootip title={`Atenção a bateria do seu smartphone está com ${socketStatusBatteryChange.battery}%`}>
+                    <ListItemIcon style={{ display: 'flex', flexDirection: 'column' }}>
+                      {socketStatusBatteryChange.battery <= 50 && <Battery50 style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'white' }} />}
+                      {socketStatusBatteryChange.battery <= 20 && <Battery20 style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'white' }} />}
+                      {socketStatusBatteryChange.battery <= 5 && <Battery5 style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'white' }} />}
+                      <div style={{ position: 'relative', left: '5px', bottom: '6px', fontSize: '12px', fontWeight: 'bold' }}>{socketStatusBatteryChange.battery}%</div>
+                    </ListItemIcon>
+                  </Tootip>
+                </ListItem>}
+              {!socketStatusSession.statusSession || socketStatusSession.statusSession === 'isLogged' &&
+                <ListItem button onClick={logout}>
+                  <Tootip title='Clique aqui para desconectar do Whatsapp'>
+                    <ListItemIcon>
+                      <PowerSettingsNewIcon style={{ fontSize: '42px', position: 'relative', right: '6px', color: 'black' }} />
+                    </ListItemIcon>
+                  </Tootip>
+                </ListItem>}
             </List>
           </DrawerStyled>
         </Grid>
@@ -246,18 +328,26 @@ function App() {
             </div>
             {(listStatus.includes(socketStatusSession.statusSession) || !socketStatusSession.statusSession) &&
               <QRCodeAuth qr_code_base64={socketQrCode.qr_code_base64}
-              statusSession={socketStatusSession.statusSession}
-              statusSessionMessageButtom={statusSessionMessageButtom}
-              setStatusSessionMessageButtom={setStatusSessionMessageButtom}
-              onClickIniciarConexaoWhatsapp={onClickIniciarConexaoWhatsapp} />
+                statusSession={socketStatusSession.statusSession}
+                statusSessionMessageButtom={statusSessionMessageButtom}
+                setStatusSessionMessageButtom={setStatusSessionMessageButtom}
+                onClickIniciarConexaoWhatsapp={onClickIniciarConexaoWhatsapp} />
             }
             <main style={{
               overflowY: 'scroll',
               height: '500px'
             }}>
-              {socketStatusBatteryChange.battery && <div>Battery: {socketStatusBatteryChange.battery} - Plugged: {socketStatusBatteryChange.plugged}</div>}  
-              <MessageContent messages={socketAllMessages} handleButtonResponder={handleButtonResponder} />
-              {/* {listStatusSuccess.includes(socketStatusSession.statusSession) && <MessageContent messages={socketAllMessages} />} */}
+              {!socketStatusSession.statusSession || socketStatusSession.statusSession === 'isLogged' &&
+                <Tabs value={valueTab} onChange={handleChangeTab} aria-label="simple tabs example">
+                  <Tab label="Mensagens de hoje" />
+                  <Tab label="Todas as mensagens" />
+                </Tabs>}
+              <TabPanel value={valueTab} index={0}>
+                {isShowLinerProgress ? <LinearProgress /> : <MessageContent messages={socketAllMessages} handleButtonResponder={handleButtonResponder} />}
+              </TabPanel>
+              <TabPanel value={valueTab} index={1}>
+                {isShowLinerProgress ? <LinearProgress /> : <MessageContent messages={socketAllMessages} handleButtonResponder={handleButtonResponder} />}
+              </TabPanel>
             </main>
           </Paper>
         </Grid>

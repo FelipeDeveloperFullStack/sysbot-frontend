@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, useEffect } from 'react'
 /** Semantic */
 import { Feed } from 'semantic-ui-react'
 import { Message } from 'semantic-ui-react'
@@ -7,8 +7,16 @@ import Button from '@material-ui/core/Button'
 import Avatar from '@material-ui/core/Avatar';
 import ChatIcon from '@material-ui/icons/Chat';
 import Paper from '@material-ui/core/Paper';
+/** dayjs */
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 
 function MessageContent(props) {
+
+  useEffect(() => {
+    dayjs.extend(relativeTime)
+  }, [props.messages])
+
   return (
     <>
       {props.messages.map(item => {
@@ -22,7 +30,7 @@ function MessageContent(props) {
                 <Feed.Content>
                   <Feed.Summary>
                     <Feed.User>{item.displayName}</Feed.User> enviou uma mensagem pra você no grupo <a>{item.chatName}</a>
-                    <Feed.Date>{item.created_at}</Feed.Date>
+                    <Feed.Date>{`${dayjs(item.created_at).format('DD/MM/YYYY')}`}</Feed.Date>
                   </Feed.Summary>
                   <Feed.Extra text>
                     <Paper elevation={3} style={{ padding: '10px', width: '80vw' }}>
@@ -45,7 +53,7 @@ function MessageContent(props) {
         )
       })}
 
-      
+
 
     </>
   )

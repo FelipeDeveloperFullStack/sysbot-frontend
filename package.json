@@ -12,6 +12,7 @@
     "@testing-library/user-event": "^12.1.10",
     "axios": "^0.24.0",
     "clsx": "^1.1.1",
+    "dayjs": "^1.10.7",
     "lodash": "^4.17.21",
     "primeicons": "^4.1.0",
     "primereact": "^7.0.0-rc.2",
