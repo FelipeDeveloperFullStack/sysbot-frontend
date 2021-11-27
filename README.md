@@ -9,5 +9,11 @@
 - [x] O sistema deverá mostrar o status do funcionamento do bot.
 - [x] O sistema deverá mostrar um botão em cada mensagem capturada para poder responder a mensagem no privado para a pessoa no Whatsapp.
 
+### Bibliotecas utilizadas
+* React
+* Socket IO Client
+* Styled Components
+* Redux
+* Material UI
 
 ![](https://i.ibb.co/PMs4hNz/sysbot01.jpg)
