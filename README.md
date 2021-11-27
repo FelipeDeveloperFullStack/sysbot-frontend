@@ -15,5 +15,6 @@
 * Styled Components
 * Redux
 * Material UI
+* Rest API
 
 ![](https://i.ibb.co/PMs4hNz/sysbot01.jpg)
