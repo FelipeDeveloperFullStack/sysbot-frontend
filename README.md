@@ -1,6 +1,6 @@
-<h1 align="center">
+<h2 align="center">
     Sistema para monitoramento de grupos de Whatsapp de acordo com a palavra chave informada.
-</h1>
+</h2>
 
 <p align="center">
   <img alt="GitHub language count" src="https://img.shields.io/github/languages/count/FelipeDeveloperFullStack/sysbot-frontend">
