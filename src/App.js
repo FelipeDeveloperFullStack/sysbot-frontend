@@ -47,7 +47,6 @@ import socketIO from 'socket.io-client'
 import alert from 'sweetalert'
 
 const drawerWidth = 200
-
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
