@@ -1,5 +1,5 @@
 <h2 align="center">
-    Sistema para monitoramento de grupos de Whatsapp de acordo com a palavra chave informada.
+    🚀 [Frontend] - Sistema para monitoramento de grupos de Whatsapp de acordo com a palavra chave informada.
 </h2>
 
 <p align="center">
